@@ -1,18 +1,30 @@
 const prisma = require('../database/index')
+const ApiError = require("../exceptions/apiError");
+const bcrypt = require("bcrypt");
 
 class UserService {
-    async createUser(name, username, password) {
+    async registration(name, username, password) {
         const existedUser = await prisma.user.findFirst({where: {username: username}});
         if (existedUser) {
-            console.log('User already exists.');
-            console.log('skipping...')
-            return {message: 'User already exists.'};
+            throw ApiError.BadRequest('User with that username already exists.')
         }
-        return prisma.user.create({data: {name, username, password}})
+
+        const hashPassword = await bcrypt.hash(password, 3);
+        return prisma.user.create({data: {name, username, password: hashPassword}});
     }
 
-    async getAllUsers() {
-        return prisma.user.findMany()
+    async login(username, password) {
+        const existedUser = await prisma.user.findFirst({where: {username: username}});
+        if (!existedUser) {
+            throw ApiError.NotFound('User with that username not found.')
+        }
+
+        const isPasswordValid = await bcrypt.compare(password, existedUser.password);
+        if (!isPasswordValid) {
+            throw ApiError.BadRequest('Invalid username or password.');
+        }
+
+        return existedUser;
     }
 }
 

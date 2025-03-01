@@ -1,22 +1,27 @@
 const userService = require('../services/userService');
+const ApiError = require('../exceptions/apiError')
 
 class UserController {
-    async createUser(req, res) {
+    async registration(req, res, next) {
         try {
             const {name, username, password} = req.body
-            const user = await userService.createUser(name, username, password)
+            if (!name || !username || !password) {
+                return next(ApiError.BadRequest('All fields are required'));
+            }
+            const user = await userService.registration(name, username, password)
             return res.status(200).json(user)
         } catch (e) {
-            console.error(e);
+            next(e)
         }
     }
 
-    async getAllUsers(req, res) {
+    async login(req, res, next) {
         try {
-            const users = await userService.getAllUsers()
-            return res.status(200).json(users)
+            const {username, password} = req.body
+            const user = await userService.login(username, password)
+            return res.status(200).json(user)
         } catch (e) {
-            console.error(e);
+            next(e);
         }
     }
 }
