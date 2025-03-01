@@ -1,12 +1,16 @@
-require("dotenv").config()
-const express = require('express')
-const cors = require('cors')
-const router = require('./router/index')
-const errorMiddleware = require('./middlewares/errorMiddleware')
-const prisma = require('./database/index')
+import dotenv from "dotenv";
+import express from "express";
+import cors from 'cors';
+
+import router from "./router";
+import prisma from './database/index';
+import errorMiddleware from "./middlewares/errorMiddleware";
+
+dotenv.config();
 
 const port = process.env.port || 8000
 const app = express()
+
 app.use(cors())
 app.use(express.json())
 

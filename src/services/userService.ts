@@ -1,10 +1,11 @@
-const prisma = require('../database/index')
-const ApiError = require("../exceptions/apiError");
-const bcrypt = require("bcrypt");
+import {User} from "@prisma/client";
+import prisma from "../database/index";
+import bcrypt from "bcrypt";
+import ApiError from "../exceptions/apiError";
 
 class UserService {
-    async registration(name, username, password) {
-        const existedUser = await prisma.user.findFirst({where: {username: username}});
+    async registration(name: string, username: string, password: string): Promise<User> {
+        const existedUser = await prisma.user.findUnique({where: {username: username}});
         if (existedUser) {
             throw ApiError.BadRequest('User with that username already exists.')
         }
@@ -13,8 +14,8 @@ class UserService {
         return prisma.user.create({data: {name, username, password: hashPassword}});
     }
 
-    async login(username, password) {
-        const existedUser = await prisma.user.findFirst({where: {username: username}});
+    async login(username: string, password: string): Promise<User> {
+        const existedUser = await prisma.user.findUnique({where: {username: username}});
         if (!existedUser) {
             throw ApiError.NotFound('User with that username not found.')
         }
@@ -28,4 +29,4 @@ class UserService {
     }
 }
 
-module.exports = new UserService()
+export default new UserService()
