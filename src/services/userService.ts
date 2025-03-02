@@ -12,11 +12,13 @@ class UserService {
 
         const hashPassword = await bcrypt.hash(password, 3);
 
-        const user = await prisma.user.create({data: {name, username, password: hashPassword}});
-        const tokens = tokenService.generateTokens({id: user.id, name: user.name, username: user.username})
-        await tokenService.saveToken(user.id, tokens.refreshToken)
+        return prisma.$transaction(async (trx) => {
+            const user = await trx.user.create({data: {name, username, password: hashPassword}});
+            const tokens = tokenService.generateTokens({id: user.id, name: user.name, username: user.username})
+            await tokenService.saveToken(trx, user.id, tokens.refreshToken)
 
-        return {...tokens, user}
+            return {...tokens, user}
+        })
     }
 
     async login(username: string, password: string) {
@@ -30,14 +32,16 @@ class UserService {
             throw ApiError.BadRequest('Invalid username or password.');
         }
 
-        const tokens = tokenService.generateTokens({
-            id: existedUser.id,
-            name: existedUser.name,
-            username: existedUser.username
-        })
-        await tokenService.saveToken(existedUser.id, tokens.refreshToken)
+        return prisma.$transaction(async (trx) => {
+            const tokens = tokenService.generateTokens({
+                id: existedUser.id,
+                name: existedUser.name,
+                username: existedUser.username
+            })
+            await tokenService.saveToken(trx, existedUser.id, tokens.refreshToken)
 
-        return {...tokens, existedUser}
+            return {...tokens, existedUser}
+        })
     }
 }
 

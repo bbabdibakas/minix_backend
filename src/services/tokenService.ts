@@ -1,5 +1,4 @@
-import prisma from "../database/index";
-import {Token, User} from "@prisma/client";
+import {Prisma, Token, User} from "@prisma/client";
 import jsonwebtoken from "jsonwebtoken";
 
 class TokenService {
@@ -17,17 +16,17 @@ class TokenService {
         }
     }
 
-    async saveToken(userId: number, refreshToken: string): Promise<Token> {
-        const existedToken = await prisma.token.findUnique({where: {userId: userId}});
+    async saveToken(trx: Prisma.TransactionClient, userId: number, refreshToken: string): Promise<Token> {
+        const existedToken = await trx.token.findUnique({where: {userId: userId}});
 
         if (existedToken) {
-            return prisma.token.update({
+            return trx.token.update({
                 where: {id: existedToken.id},
                 data: {refreshToken}
             });
         }
 
-        return prisma.token.create({
+        return trx.token.create({
             data: {userId, refreshToken}
         })
     }
