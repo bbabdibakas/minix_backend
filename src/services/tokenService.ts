@@ -1,0 +1,36 @@
+import prisma from "../database/index";
+import {Token, User} from "@prisma/client";
+import jsonwebtoken from "jsonwebtoken";
+
+class TokenService {
+    generateTokens(payload: Omit<User, 'password' | 'createdAt'>) {
+        if (!process.env.JWT_ACCESS_SECRET || !process.env.JWT_REFRESH_SECRET) {
+            throw new Error('JWT secrets are not defined.')
+        }
+
+        const accessToken = jsonwebtoken.sign(payload, process.env.JWT_ACCESS_SECRET, {expiresIn: '60s'})
+        const refreshToken = jsonwebtoken.sign(payload, process.env.JWT_REFRESH_SECRET, {expiresIn: '30m'})
+
+        return {
+            accessToken,
+            refreshToken
+        }
+    }
+
+    async saveToken(userId: number, refreshToken: string): Promise<Token> {
+        const existedToken = await prisma.token.findUnique({where: {userId: userId}});
+
+        if (existedToken) {
+            return prisma.token.update({
+                where: {id: existedToken.id},
+                data: {refreshToken}
+            });
+        }
+
+        return prisma.token.create({
+            data: {userId, refreshToken}
+        })
+    }
+}
+
+export default new TokenService()
