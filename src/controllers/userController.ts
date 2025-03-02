@@ -13,6 +13,10 @@ interface LoginBody {
     password?: string;
 }
 
+interface LogoutBody {
+    refreshToken?: string;
+}
+
 class UserController {
     async registration(req: Request<Record<string, never>, {}, RegistrationBody>, res: Response, next: NextFunction) {
         try {
@@ -36,6 +40,21 @@ class UserController {
                 return
             }
             const user = await userService.login(username, password)
+            res.status(200).json(user)
+        } catch (e) {
+            next(e);
+        }
+    }
+
+    async getProfileByUsername(req: Request<{ username: string }>, res: Response, next: NextFunction) {
+        try {
+            const {username} = req.params
+            if (!username) {
+                next(ApiError.BadRequest('All fields are required'));
+                return
+            }
+
+            const user = await userService.getProfileByUsername(username)
             res.status(200).json(user)
         } catch (e) {
             next(e);

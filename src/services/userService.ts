@@ -16,7 +16,6 @@ class UserService {
             const user = await trx.user.create({data: {name, username, password: hashPassword}});
             const tokens = tokenService.generateTokens({id: user.id, name: user.name, username: user.username})
             await tokenService.saveToken(trx, user.id, tokens.refreshToken)
-
             return {...tokens, user}
         })
     }
@@ -42,6 +41,19 @@ class UserService {
 
             return {...tokens, existedUser}
         })
+    }
+
+    async logout(refreshToken: string) {
+        return tokenService.removeToken(refreshToken);
+    }
+
+    async getProfileByUsername(username: string) {
+        const existedUser = await prisma.user.findUnique({where: {username: username}});
+        if (!existedUser) {
+            throw ApiError.NotFound('User with that username not found.')
+        }
+
+        return existedUser
     }
 }
 

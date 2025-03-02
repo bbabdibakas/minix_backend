@@ -2,7 +2,7 @@ import {Prisma, Token, User} from "@prisma/client";
 import jsonwebtoken from "jsonwebtoken";
 
 class TokenService {
-    generateTokens(payload: Omit<User, 'password' | 'createdAt'>) {
+    generateTokens(payload: Omit<User, 'bio' | 'password' | 'createdAt'>) {
         if (!process.env.JWT_ACCESS_SECRET || !process.env.JWT_REFRESH_SECRET) {
             throw new Error('JWT secrets are not defined.')
         }
@@ -13,6 +13,18 @@ class TokenService {
         return {
             accessToken,
             refreshToken
+        }
+    }
+
+    validateAccessToken(accessToken: string) {
+        try {
+            if (!process.env.JWT_ACCESS_SECRET) {
+                throw new Error('JWT secrets are not defined.')
+            }
+            return jsonwebtoken.verify(accessToken, process.env.JWT_ACCESS_SECRET)
+        } catch (error) {
+            console.error(error)
+            return null
         }
     }
 
