@@ -16,7 +16,17 @@ class UserService {
             const user = await trx.user.create({data: {name, username, password: hashPassword}});
             const tokens = tokenService.generateTokens({id: user.id, name: user.name, username: user.username})
             await tokenService.saveToken(trx, user.id, tokens.refreshToken)
-            return {...tokens, user}
+
+            return {
+                userData: {
+                    id: user.id,
+                    name: user.name,
+                    username: user.username,
+                    bio: user.bio,
+                    createdAt: user.createdAt,
+                },
+                ...tokens
+            }
         })
     }
 
@@ -39,12 +49,17 @@ class UserService {
             })
             await tokenService.saveToken(trx, existedUser.id, tokens.refreshToken)
 
-            return {...tokens, existedUser}
+            return {
+                userData: {
+                    id: existedUser.id,
+                    name: existedUser.name,
+                    username: existedUser.username,
+                    bio: existedUser.bio,
+                    createdAt: existedUser.createdAt,
+                },
+                ...tokens
+            }
         })
-    }
-
-    async logout(refreshToken: string) {
-        return tokenService.removeToken(refreshToken);
     }
 
     async getProfileByUsername(username: string) {
