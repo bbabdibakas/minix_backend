@@ -25,7 +25,9 @@ class UserService {
                     bio: user.bio,
                     createdAt: user.createdAt,
                 },
-                ...tokens
+                tokenData: {
+                    ...tokens
+                }
             }
         })
     }
@@ -57,18 +59,26 @@ class UserService {
                     bio: existedUser.bio,
                     createdAt: existedUser.createdAt,
                 },
-                ...tokens
+                tokenData: {
+                    ...tokens
+                }
             }
         })
     }
 
-    async getProfileByUsername(username: string) {
+    async getUserByUsername(username: string) {
         const existedUser = await prisma.user.findUnique({where: {username: username}});
         if (!existedUser) {
             throw ApiError.NotFound('User with that username not found.')
         }
 
-        return existedUser
+        return {
+            id: existedUser.id,
+            name: existedUser.name,
+            username: existedUser.username,
+            bio: existedUser.bio,
+            createdAt: existedUser.createdAt,
+        }
     }
 }
 

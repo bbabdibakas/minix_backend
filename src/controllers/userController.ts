@@ -13,10 +13,6 @@ interface LoginBody {
     password?: string;
 }
 
-interface LogoutBody {
-    refreshToken?: string;
-}
-
 class UserController {
     async registration(req: Request<Record<string, never>, {}, RegistrationBody>, res: Response, next: NextFunction) {
         try {
@@ -46,7 +42,7 @@ class UserController {
         }
     }
 
-    async getProfileByUsername(req: Request<{ username: string }>, res: Response, next: NextFunction) {
+    async getUserByUsername(req: Request<{ username: string }>, res: Response, next: NextFunction) {
         try {
             const {username} = req.params
             if (!username) {
@@ -54,7 +50,7 @@ class UserController {
                 return
             }
 
-            const user = await userService.getProfileByUsername(username)
+            const user = await userService.getUserByUsername(username)
             res.status(200).json(user)
         } catch (e) {
             next(e);

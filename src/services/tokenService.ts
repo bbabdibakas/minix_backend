@@ -7,7 +7,7 @@ class TokenService {
             throw new Error('JWT secrets are not defined.')
         }
 
-        const accessToken = jsonwebtoken.sign(payload, process.env.JWT_ACCESS_SECRET, {expiresIn: '60s'})
+        const accessToken = jsonwebtoken.sign(payload, process.env.JWT_ACCESS_SECRET, {expiresIn: '30m'})
         const refreshToken = jsonwebtoken.sign(payload, process.env.JWT_REFRESH_SECRET, {expiresIn: '30m'})
 
         return {

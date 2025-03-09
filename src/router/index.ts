@@ -8,8 +8,9 @@ const router = Router()
 router.post('/registration', userController.registration)
 router.post('/login', userController.login)
 //users
-router.get('/users/:username', authMiddleware, userController.getProfileByUsername)
-// router.patch('/users/:username',authMiddleware, userController.editProfileByUsername)
-// router.delete('/users/:username',authMiddleware, userController.deleteProfileByUsername)
+
+router.get('/profiles/:username', authMiddleware, userController.getUserByUsername)
+// router.patch('/profiles/:id',authMiddleware, userController.editUserById)
+// router.delete('/profiles/:id',authMiddleware, userController.deleteUserById)
 
 export default router;
