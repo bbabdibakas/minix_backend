@@ -17,6 +17,7 @@ class UserService {
             const tokens = tokenService.generateTokens({id: user.id, name: user.name, username: user.username})
             await tokenService.saveToken(trx, user.id, tokens.refreshToken)
 
+            // TODO: have to simplify return data
             return {
                 userData: {
                     id: user.id,
@@ -51,6 +52,7 @@ class UserService {
             })
             await tokenService.saveToken(trx, existedUser.id, tokens.refreshToken)
 
+            // TODO: have to simplify return data
             return {
                 userData: {
                     id: existedUser.id,
@@ -72,12 +74,37 @@ class UserService {
             throw ApiError.NotFound('User with that username not found.')
         }
 
+        // TODO: have to simplify return data
         return {
             id: existedUser.id,
             name: existedUser.name,
             username: existedUser.username,
             bio: existedUser.bio,
             createdAt: existedUser.createdAt,
+        }
+    }
+
+    async editUserById(id: number, username: string, name: string, bio: string) {
+        const existedUser = await prisma.user.findUnique({where: {id: id}});
+        if (!existedUser) {
+            throw ApiError.NotFound('User with that id not found.')
+        }
+
+        const updatedUser = await prisma.user.update({
+            where: {id: id}, data: {
+                name: name,
+                username: username,
+                bio: bio,
+            }
+        })
+
+        // TODO: have to simplify return data
+        return {
+            id: updatedUser.id,
+            name: updatedUser.name,
+            username: updatedUser.username,
+            bio: updatedUser.bio,
+            createdAt: updatedUser.createdAt,
         }
     }
 }

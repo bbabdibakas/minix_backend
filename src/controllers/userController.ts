@@ -13,6 +13,12 @@ interface LoginBody {
     password?: string;
 }
 
+interface EditUserBody {
+    name?: string;
+    username?: string;
+    bio?: string;
+}
+
 class UserController {
     async registration(req: Request<Record<string, never>, {}, RegistrationBody>, res: Response, next: NextFunction) {
         try {
@@ -51,6 +57,23 @@ class UserController {
             }
 
             const user = await userService.getUserByUsername(username)
+            res.status(200).json(user)
+        } catch (e) {
+            next(e);
+        }
+    }
+
+    async editUserById(req: Request<{ id?: string }, {}, EditUserBody>, res: Response, next: NextFunction) {
+        try {
+            const {id} = req.params
+            const {username, name, bio} = req.body
+
+            if (!id || !username || !name || !bio) {
+                next(ApiError.BadRequest('All fields are required'));
+                return
+            }
+
+            const user = await userService.editUserById(parseInt(id, 10), username, name, bio)
             res.status(200).json(user)
         } catch (e) {
             next(e);
